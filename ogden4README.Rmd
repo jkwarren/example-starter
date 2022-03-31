@@ -1,0 +1,82 @@
+---
+title: "ogden4README.Rmd"
+author: "Jessica Warren"
+date: '2022-03-28'
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Ogden4
+
+Modifying the input parameter and transition function files we've been using in order to match Ogden as closely as possible.
+
+## Goal of Ogden4
+
+see the pattern between the observed and the predicted numbers for larvae, nymphs, and adults
+
+## identified differences between Ogden and this implementation:
+
+-   Ogden has density dependent reduction in fecundity of egg-laying females
+-   Ogden handles host finding differently
+    -   host finding probability from Ogden is weekly, and diff for adults vs larvae and nymphs. Weekly prob is (.0089 \* 200 ^ .515) = 0.13 for larvae and nymphs, (0.06 \* 20 ^ .515) = 0.2806608 for adults. We've been using daily probability of 4e-4... my probability math is rusty, not sure how we'd convert.
+    -   Ogden uses Fig 3 curve to determine prob of active questing, vs our briere function approach - input weather data... I poked around a bit online for the weather data from the statio in Ontario they use, but no luck
+
+## installation
+
+Install the package needed with:
+
+    install.packages("IxPopDyMod")
+    library(IxPopDyMod)
+    Library(readr)
+
+    library(tidyverse)
+    pacman::p_load(gridExtra)
+
+## Create the tables
+
+This puts together the tables for:
+
+-   predicted larvae `pl`
+-   predicted nymphs `pn`
+-   predicted adults `pa`
+-   observed larvae `ol`
+-   observed nymphs `on`
+-   observed adults `oa`
+
+<!-- -->
+
+    pl <- read_csv('data-raw/ogden2005/make_ogden_fig4/predicted_larvae.csv',
+                   col_names = c('jday', 'n')) %>% mutate(group = 'pl')
+    pn <- read_csv('data-raw/ogden2005/make_ogden_fig4/predicted_nymphs.csv',
+                   col_names = c('jday', 'n')) %>% mutate(group = 'pn')
+    pa <- read_csv('data-raw/ogden2005/make_ogden_fig4/predicted_adults.csv',
+                   col_names = c('jday', 'n')) %>% mutate(group = 'pa')
+    ol <- read_csv('data-raw/ogden2005/make_ogden_fig4/observed_larvae.csv',
+                   col_names = c('jday', 'n')) %>% mutate(group = 'ol')
+    on <- read_csv('data-raw/ogden2005/make_ogden_fig4/observed_nymphs.csv',
+                   col_names = c('jday', 'n')) %>% mutate(group = 'on')
+    oa <- read_csv('data-raw/ogden2005/make_ogden_fig4/observed_adults.csv',
+                   col_names = c('jday', 'n')) %>% mutate(group = 'oa')
+
+##### If `Error: 'data-raw/ogden2005/make_ogden_fig4/predicted_larvae.csv' does not exist in current working directory` appears
+
+1.  Go to IxPopDyMod
+2.  Go to -\> data-raw
+3.  -\> ogden2005
+4.  -\> make_ogden_fig4
+5.  find the file needed
+    -   ex. "predicted_larvae.csv"
+6.  click here
+7.  click on "permalink"
+8.  `read_csv('` paste here `',`...
+
+### Looking At What This Does
+
+`col_names = c('jday', 'n')) %>% mutate(group =' '`
+
+`col_names` specifies what columns to make with the data. Here, `jday` (Julian Date) and `n` () are what we want to assign to the data already in the `.csv`
+
+`%>% mutate(group = '')` is saying mutate, or create a new table while preserving the old one, and add on the column group that labels these rows as on of the variable names (`on`, `pn`, ect.)
